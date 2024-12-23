@@ -8755,7 +8755,11 @@ addcmd('goto',{'to'},function(args, speaker)
 	end
 	execCmd('breakvelocity')
 end)
-
+addcmd('reset', {}, function(args, speaker)
+	execCmd("walkfling")
+	wait(0.1)
+	game.Players.LocalPlayer.Character:WaitForChild("Head"):Destroy()
+end)
 addcmd('tweengoto',{'tgoto','tto','tweento'},function(args, speaker)
 	local players = getPlayer(args[1], speaker)
 	for i,v in pairs(players)do
