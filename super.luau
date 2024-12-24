@@ -8755,7 +8755,7 @@ addcmd('goto',{'to'},function(args, speaker)
 	end
 	execCmd('breakvelocity')
 end)
-addcmd('reset', {}, function(args, speaker)
+addcmd('fix', {}, function(args, speaker)
 	execCmd("walkfling")
 	wait(0.1)
 	game.Players.LocalPlayer.Character:WaitForChild("Head"):Destroy()
