@@ -11535,7 +11535,6 @@ addcmd("walkfling", {}, function(args, speaker)
         end)
     end
 
-    --execCmd("noclip nonotify")
     walkflinging = true
     repeat RunService.Heartbeat:Wait()
         local character = speaker.Character
