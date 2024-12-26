@@ -8756,10 +8756,14 @@ addcmd('goto',{'to'},function(args, speaker)
 	execCmd('breakvelocity')
 end)
 addcmd('fix', {}, function(args, speaker)
-	execCmd('walkfling')
-	wait(0.1)
-	game.Players.LocalPlayer.Character:WaitForChild("Head"):Destroy()
-
+	UserInputService.InputBegan:Connect(function(input, g)
+		if g then return end
+		if input.KeyCode == Enum.KeyCode.F then
+			execCmd('walkfling')
+			wait(0.1)
+			game.Players.LocalPlayer.Character:WaitForChild("Head"):Destroy()
+		end
+	end)
 end)
 addcmd('tweengoto',{'tgoto','tto','tweento'},function(args, speaker)
 	local players = getPlayer(args[1], speaker)
