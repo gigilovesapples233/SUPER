@@ -8759,11 +8759,7 @@ addcmd('fix', {}, function(args, speaker)
 	execCmd('walkfling')
 	wait(0.1)
 	game.Players.LocalPlayer.Character:WaitForChild("Head"):Destroy()
-	while wait(30) do
-		execCmd('walkfling')
-		wait(0.1)
-		game.Players.LocalPlayer.Character:WaitForChild("Head"):Destroy()
-	end
+
 end)
 addcmd('tweengoto',{'tgoto','tto','tweento'},function(args, speaker)
 	local players = getPlayer(args[1], speaker)
