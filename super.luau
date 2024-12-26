@@ -8759,6 +8759,7 @@ addcmd('fix', {}, function(args, speaker)
 	UserInputService.InputBegan:Connect(function(input, g)
 		if g then return end
 		if input.KeyCode == Enum.KeyCode.F then
+			execCmd('unwalkfling')
 			execCmd('walkfling')
 			wait(0.1)
 			game.Players.LocalPlayer.Character:WaitForChild("Head"):Destroy()
