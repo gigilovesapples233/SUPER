@@ -8766,6 +8766,94 @@ addcmd('fix', {}, function(args, speaker)
 		end
 	end)
 end)
+addcmd('deep', {}, function(args, speaker)
+	local FOV = 160
+	local requiredRank = 110
+	local highlightTemplate = Instance.new("Highlight")
+	highlightTemplate.FillTransparency = 0.5
+	highlightTemplate.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+	local maxVolume = 10000
+	local pelletCount = 180
+	local spreadAngle = 60
+	local highlightedParts = {}
+	
+	game:GetService("RunService").RenderStepped:Connect(function()
+		for _, player in ipairs(game.Players:GetPlayers()) do
+			if player:GetRankInGroup(10261023) >= requiredRank then
+				local character = player.Character
+				if character then
+					local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+					local humanoid = character:WaitForChild("Humanoid")
+					local lookForward = humanoidRootPart.CFrame.LookVector
+					local lookBackward = -lookForward
+	
+					local feetPosition = humanoidRootPart.Position - Vector3.new(0, humanoidRootPart.Size.Y / 2, 0) 
+	
+					local rayOrigin = feetPosition + lookForward * 1
+	
+					local partsToHighlight = {}
+	
+					for _ = 1, pelletCount / 2 do
+						local spreadX = math.random() * spreadAngle - (spreadAngle / 2)
+						local spreadY = math.random() * spreadAngle - (spreadAngle / 2)
+						local rotatedVector = (humanoidRootPart.CFrame * CFrame.Angles(math.rad(spreadY), math.rad(spreadX), 0)).LookVector
+						local rayDirection = rotatedVector * 10000
+						local ray = Ray.new(rayOrigin, rayDirection)
+	
+						local hit, position = workspace:FindPartOnRay(ray)
+	
+						if hit then
+							local volume = hit.Size.X * hit.Size.Y * hit.Size.Z
+							if volume < maxVolume then
+								if not highlightedParts[hit] then
+									local newHighlight = highlightTemplate:Clone()
+									newHighlight.Parent = hit
+									newHighlight.Adornee = hit
+									newHighlight.FillColor = Color3.fromRGB(255, 0, 0)
+									highlightedParts[hit] = newHighlight
+								end
+								partsToHighlight[hit] = true
+							end
+						end
+					end
+	
+					for _ = 1, pelletCount / 2 do
+						local spreadX = math.random() * spreadAngle - (spreadAngle / 2)
+						local spreadY = math.random() * spreadAngle - (spreadAngle / 2)
+						local rotatedVector = (humanoidRootPart.CFrame * CFrame.Angles(math.rad(spreadY), math.rad(spreadX), 0)).LookVector
+						local rayOriginBackward = feetPosition + lookBackward * 3
+						local rayDirection = (rotatedVector * -1) * 10000
+						local ray = Ray.new(rayOriginBackward, rayDirection)
+	
+						local hit, position = workspace:FindPartOnRay(ray)
+	
+						if hit then
+							local volume = hit.Size.X * hit.Size.Y * hit.Size.Z
+							if volume < maxVolume then
+								if not highlightedParts[hit] then
+									local newHighlight = highlightTemplate:Clone()
+									newHighlight.Parent = hit
+									newHighlight.Adornee = hit
+									newHighlight.FillColor = Color3.fromRGB(255, 165, 0)
+									highlightedParts[hit] = newHighlight
+								end
+								partsToHighlight[hit] = true
+							end
+						end
+					end
+	
+					for part, highlight in pairs(highlightedParts) do
+						if not partsToHighlight[part] then
+							highlightedParts[part] = nil
+							highlight:Destroy()
+						end
+					end
+				end
+			end
+		end
+		wait(1)
+	end)
+end)
 addcmd('tweengoto',{'tgoto','tto','tweento'},function(args, speaker)
 	local players = getPlayer(args[1], speaker)
 	for i,v in pairs(players)do
