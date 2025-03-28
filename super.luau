@@ -8773,7 +8773,7 @@ addcmd('deep', {}, function(args, speaker)
 	highlightTemplate.FillTransparency = 0.5
 	highlightTemplate.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 	local maxVolume = 10000
-	local pelletCount = 100
+	local pelletCount = 70
 	local spreadAngle = 135
 	local highlightedParts = {}
 	
@@ -8781,6 +8781,9 @@ addcmd('deep', {}, function(args, speaker)
 	
 	game:GetService("RunService").RenderStepped:Connect(function()
 		for _, player in ipairs(game.Players:GetPlayers()) do
+			if player.Parent ~= game.Players then 
+				continue
+			end
 			if player:GetRankInGroup(10261023) >= requiredRank then
 				local character = player.Character
 				if character then
