@@ -8767,18 +8767,39 @@ addcmd('fix', {}, function(args, speaker)
 	end)
 end)
 addcmd('deep', {}, function(args, speaker)
-	local FOV = 135
+	local function getRootModel(part)
+		local model = part
+		local maxIterations = 25
+		local iterations = 0
+
+		while model and not model:IsA("Model") and iterations < maxIterations do
+			model = model.Parent
+			iterations = iterations + 1
+			task.wait()
+		end
+
+		if not model then
+			return nil
+		end
+
+		while model.Parent and model.Parent:IsA("Model") do
+			model = model.Parent
+			task.wait()
+		end
+
+		return model
+	end
+	local FOV = 180
 	local requiredRank = 110
 	local highlightTemplate = Instance.new("Highlight")
 	highlightTemplate.FillTransparency = 0.5
 	highlightTemplate.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 	local maxVolume = 10000
-	local pelletCount = 70
-	local spreadAngle = 135
-	local highlightedParts = {}
-	
+	local pelletCount = 10
+	local highlightedModels = {}
+
 	local sectorHeight = 20
-	
+
 	game:GetService("RunService").RenderStepped:Connect(function()
 		for _, player in ipairs(game.Players:GetPlayers()) do
 			if player.Parent ~= game.Players then 
@@ -8791,32 +8812,35 @@ addcmd('deep', {}, function(args, speaker)
 					local humanoid = character:WaitForChild("Humanoid")
 					local lookForward = humanoidRootPart.CFrame.LookVector
 					local lookBackward = -lookForward
-	
+
 					local hrpPosition = humanoidRootPart.Position 
-	
+
 					local rayOrigin = hrpPosition + lookForward * 1
-	
-					local partsToHighlight = {}
-	
+
+					local modelsToHighlight = {}
+
 					local function processRay(rayOrigin, rayDirection, highlightColor)
 						local currentOrigin = rayOrigin
 						local remainingDistance = 10000
-	
+
 						while remainingDistance > 0 do
 							local ray = Ray.new(currentOrigin, rayDirection)
 							local hit, position = workspace:FindPartOnRay(ray)
-	
+
 							if hit then
 								local volume = hit.Size.X * hit.Size.Y * hit.Size.Z
 								if volume < maxVolume then
-									if not highlightedParts[hit] then
-										local newHighlight = highlightTemplate:Clone()
-										newHighlight.Parent = hit
-										newHighlight.Adornee = hit
-										newHighlight.FillColor = highlightColor
-										highlightedParts[hit] = newHighlight
+									local model = getRootModel(hit)
+									if model and model.Parent == game:GetService("Workspace"):WaitForChild("SpawnedCars") then
+										if not highlightedModels[model] then
+											local newHighlight = highlightTemplate:Clone()
+											newHighlight.Parent = model
+											newHighlight.Adornee = model
+											newHighlight.FillColor = highlightColor
+											highlightedModels[model] = newHighlight
+										end
+										modelsToHighlight[model] = true
 									end
-									partsToHighlight[hit] = true
 								end
 								local distanceToHit = (currentOrigin - position).Magnitude
 								remainingDistance = remainingDistance - distanceToHit
@@ -8826,41 +8850,40 @@ addcmd('deep', {}, function(args, speaker)
 							end
 						end
 					end
-	
+
 					local function getRandomSpreadDirection()
-						local spreadAngleRad = math.rad(spreadAngle)
+						local spreadAngleRad = math.rad(18)
 						local spreadHalf = spreadAngleRad / 2
 						local azimuth = math.random() * spreadAngleRad - spreadHalf
-	
+
 						local x = math.random() * sectorHeight - sectorHeight / 2
 						local z = math.random() * sectorHeight - sectorHeight / 2
-	
+
 						local rotation = CFrame.Angles(0, azimuth, 0)
-	
+
 						return (humanoidRootPart.CFrame * rotation).LookVector + Vector3.new(x, 0, z)
 					end
-	
+
 					for _ = 1, pelletCount / 2 do
 						local rayDirection = getRandomSpreadDirection() * 10000
 						processRay(rayOrigin, rayDirection, Color3.fromRGB(255, 0, 0))
 					end
-	
+
 					for _ = 1, pelletCount / 2 do
 						local rayOriginBackward = hrpPosition + lookBackward * 3
 						local rayDirection = getRandomSpreadDirection() * -10000
 						processRay(rayOriginBackward, rayDirection, Color3.fromRGB(255, 165, 0))
 					end
-	
-					for part, highlight in pairs(highlightedParts) do
-						if not partsToHighlight[part] then
-							highlightedParts[part] = nil
+					for model, highlight in pairs(highlightedModels) do
+						if not modelsToHighlight[model] then
+							highlightedModels[model] = nil
 							highlight:Destroy()
 						end
 					end
 				end
 			end
 		end
-		wait(3)
+		wait(4)
 	end)
 end)
 addcmd('tweengoto',{'tgoto','tto','tweento'},function(args, speaker)
